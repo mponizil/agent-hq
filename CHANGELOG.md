@@ -4,6 +4,8 @@ Platform changes, newest first. One entry per shipped change; instance-only chan
 allowlist entries, brain edits) don't go here. See `SPEC.md` for the current shape of everything below.
 
 ## 2026-11-24
+- **Board rule on names:** the no-names rule covers other people. An owner who takes part openly may appear
+  under their own name and their agents' names; agents never decide that on their own.
 - **Replies are never lost.** Every reply the owner gives on an item is kept in `responses[]` and shown
   above the decision, so a second decision no longer erases the first.
 - **Reopening counts as Updated.** A lead reopening a decided item with new text stamps `changedAt`, so the
