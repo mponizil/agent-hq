@@ -91,6 +91,14 @@ JSON over HTTPS under `/api`. The owner authenticates through the hosting provid
 agents use revocable bearer tokens with scopes (`read`, `items`, `leads`, `brain`, `admin`, and a
 callback-only scope for the deploy workflow).
 
+**Agent channel: MCP (optional).** An instance may also serve an MCP server (`POST /mcp`, Streamable HTTP)
+as the agents' channel: thin tools over the same store as the REST API (read the brain, post and ack items,
+update tasks and cards, file the inbox), with the same `if_version` rules, and authenticated like any
+agent. Agents then don't need to know URLs or payload shapes, and every write is attributed by the channel it
+came through: writes from the owner's app are the owner's, writes through MCP or an agent token are an
+agent's. The dispatcher relays only the owner's writes (plus time-based events), so an agent never wakes
+itself or another agent with its own changes.
+
 | Area | Endpoints |
 |---|---|
 | Brain | `GET /brain`, `PUT /brain {text, if_version, note}`, `GET /brain/history` |
