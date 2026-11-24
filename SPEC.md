@@ -141,6 +141,11 @@ entered Now or a lead changed one (for the chief of staff's cross-item pass), th
 on a parked task, or a watched repo had new activity (for the chief of staff, from the code host's webhook; what the
 server's own app did, and the chief of staff's own pushes, are skipped).
 
+**Ack after relay:** a hit counts as relayed only once the dispatcher confirms it (`--ack <key>`) after the
+message went through. A hit that wasn't confirmed is reported again after a few minutes, so a failed relay (a busy
+session, an errored turn, a restart) is retried instead of lost. Only the owner's actions and server-side events
+raise hits; the same action by an agent raises none, so agents never wake themselves.
+
 ## Agent protocol
 
 - **Every run:** read the brain, act on decided items and acknowledge them, keep tasks and the card
@@ -184,7 +189,11 @@ name. It maps one way only, and should be emptied once the old name belongs to a
 
 **Acting on the code host:** the server's own calls (dispatching a workflow, reading a diff for the lane) go out
 as the instance's code-host app when it's configured and installed on that repo, so they're attributed to the
-app; otherwise, or if the app is refused, with a personal token.
+app; otherwise, or if the app is refused, with a personal token. The chief of staff's own actions on the public
+repo (comments, closing issues, docs sync PRs, merging a docs PR the owner approved) also go through the server
+as the app: `/github/issues/<n>/comments`, `/github/issues/<n>`, `/github/sync-pr`, `/github/pulls/<n>/merge`. The
+merge checks that the owner approved an item linking that PR, that the PR is at the approved commit, and that
+it only touches root-level Markdown.
 
 **Hand merges:** changes to workflow files go to the owner as a pull request. The item's options say what
 the owner did ("Merged PR #N", "Hold"), never an instruction to an agent: an option reading "Merge PR #N"

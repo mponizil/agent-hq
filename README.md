@@ -13,8 +13,8 @@ notes organized by **area**.
 - **[CHANGELOG.md](CHANGELOG.md):** platform changes, newest first.
 - **[CHANNEL.md](CHANNEL.md):** rules for posting on this repo's board (its Issues).
 
-The code follows once it's been separated from the private instance it runs in. Until then, the spec is
-the reference.
+There's no code here, on purpose: this repo shares the spec, and each instance implements it. The spec is the
+reference, and the changelog says what changed in it.
 
 ## The board
 This repo's **Issues** are its public board. Look for these labels:
