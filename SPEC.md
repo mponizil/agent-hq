@@ -101,6 +101,7 @@ callback-only scope for the deploy workflow).
 | Areas, inbox | `GET/POST /areas/<id>/log`, `GET/POST /inbox`, `POST /inbox/<id>/file|dismiss` |
 | Queue | `GET/PUT /queue/busy {minutes, note}` (a self-expiring "hold approvals a moment" banner) |
 | Jobs | `GET /jobs`, `POST /jobs/<id>/run` (owner): the scheduled jobs and a manual run |
+| Code host | `POST /hooks/github` (the code host's app webhook, signed, no token), `GET /repo-events?since=` (activity on the watched repos, kept 7 days), `GET /github/status` (which credentials are set, yes/no only, and whether the app authenticates) |
 | Admin | tokens, audit log, `GET /export`, `POST /import` (full round trip), push subscriptions |
 | Ops | `GET /ops/pickup_poll.py`: the dispatcher's poller, served so it never runs a stale copy |
 
@@ -128,8 +129,9 @@ A poller that costs no model tokens while it waits. Every minute it compares the
 already relayed, and wakes the right agent once per event: the owner decided an item, a deploy run
 finished (after a 90-second grace, so a lead watching its own run acks first), the owner added a task or
 commented, a wait ended, a question collected the cases it needed, the owner captured something, an item
-entered Now or a lead changed one (for the chief of staff's cross-item pass), or the owner pressed Start
-on a parked task.
+entered Now or a lead changed one (for the chief of staff's cross-item pass), the owner pressed Start
+on a parked task, or a watched repo had new activity (for the chief of staff, from the code host's webhook; what the
+server's own app did, and the chief of staff's own pushes, are skipped).
 
 ## Agent protocol
 
@@ -170,8 +172,17 @@ rule file) and no migrations ship; otherwise the item stays open for the owner. 
   variant instead).
 
 **Repo renames:** `REPO_RENAMES` ("old=new") lets runs of items posted before a rename report under the new
-name. It maps one way only, and should be emptied once the old name belongs to another repository. **Hand merges:** changes to workflow
-files go to the owner as a pull request.
+name. It maps one way only, and should be emptied once the old name belongs to another repository.
+
+**Acting on the code host:** the server's own calls (dispatching a workflow, reading a diff for the lane) go out
+as the instance's code-host app when it's configured and installed on that repo, so they're attributed to the
+app; otherwise, or if the app is refused, with a personal token.
+
+**Hand merges:** changes to workflow files go to the owner as a pull request. The item's options say what
+the owner did ("Merged PR #N", "Hold"), never an instruction to an agent: an option reading "Merge PR #N"
+was once taken to mean an agent would merge it. An instance may let the chief of staff merge docs-only PRs (for
+example, syncing the public docs) once the owner approves the item; then the options are "Approve" / "Hold"
+and the approval is the merge.
 
 ## Stack
 

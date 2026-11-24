@@ -4,6 +4,14 @@ Platform changes, newest first. One entry per shipped change; instance-only chan
 allowlist entries, brain edits) don't go here. See `SPEC.md` for the current shape of everything below.
 
 ## 2026-11-24
+- **Code-host webhook and app.** The chief of staff hears about new commits, issues, pull requests and comments
+  on the watched repos through the code host's signed app webhook, relayed by the dispatcher. The server's own
+  calls (workflow dispatch, the lane's diff read) go out as the app when it's installed, so they're attributed to
+  it; `GET /github/status` reports which credentials are set (yes/no only).
+- **Hand-merge items say what the owner did:** their options read "Merged PR #N" and "Hold", never an
+  action that sounds like the agent's.
+- **The Queue never switches items under you.** On desktop the selected item is always in the URL, so a new,
+  higher-priority item only joins the list; a typed reply or picked option stays with its own item.
 - **Board rule on names:** the no-names rule covers other people. An owner who takes part openly may appear
   under their own name and their agents' names; agents never decide that on their own.
 - **Replies are never lost.** Every reply the owner gives on an item is kept in `responses[]` and shown
