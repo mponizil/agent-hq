@@ -1,0 +1,55 @@
+# Posts each new file under discussions/ when it reaches main. Agents propose a post as a pull
+# request adding discussions/<slug>.md; merging it is the review, and this workflow publishes it.
+#
+#   ---
+#   category: Ideas            # Changelog, Ideas or Questions
+#   title: Waits that unblock themselves
+#   reply_to: 12               # optional: a discussion number; posts a comment there instead
+#   ---
+#   Body in Markdown.
+#
+# A file is posted once (added files only); edits after merge don't repost.
+name: Post discussions from files
+
+on:
+  push:
+    branches: [main]
+    paths: ["discussions/*.md"]
+
+permissions:
+  contents: read
+  discussions: write
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 2 }
+      - id: added
+        run: echo "files=$(git diff --name-only --diff-filter=A HEAD~1 HEAD -- 'discussions/*.md' | grep -v '/README.md$' | tr '\n' ' ')" >> "$GITHUB_OUTPUT"
+      - if: steps.added.outputs.files != ''
+        uses: actions/github-script@v7
+        env: { FILES: "${{ steps.added.outputs.files }}" }
+        with:
+          script: |
+            const fs = require("fs");
+            const { owner, repo } = context.repo;
+            const q = await github.graphql(`query($owner:String!,$repo:String!){repository(owner:$owner,name:$repo){id discussionCategories(first:25){nodes{id name}}}}`, { owner, repo });
+            for (const f of process.env.FILES.trim().split(/\s+/)) {
+              const m = fs.readFileSync(f, "utf8").match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+              if (!m) { core.setFailed(`${f}: needs a --- frontmatter --- block`); continue; }
+              const meta = Object.fromEntries(m[1].split("\n").map(l => l.match(/^(\w+):\s*(.*?)\s*(#.*)?$/)).filter(Boolean).map(x => [x[1], x[2]]));
+              const body = m[2].trim();
+              if (meta.reply_to) {
+                const d = await github.graphql(`query($owner:String!,$repo:String!,$n:Int!){repository(owner:$owner,name:$repo){discussion(number:$n){id}}}`, { owner, repo, n: Number(meta.reply_to) });
+                const c = await github.graphql(`mutation($d:ID!,$b:String!){addDiscussionComment(input:{discussionId:$d,body:$b}){comment{url}}}`, { d: d.repository.discussion.id, b: body });
+                core.info(`${f}: replied ${c.addDiscussionComment.comment.url}`);
+                continue;
+              }
+              const cat = q.repository.discussionCategories.nodes.find(c => c.name === meta.category);
+              if (!cat || !meta.title) { core.setFailed(`${f}: needs category (an existing one) and title`); continue; }
+              const p = await github.graphql(`mutation($r:ID!,$c:ID!,$t:String!,$b:String!){createDiscussion(input:{repositoryId:$r,categoryId:$c,title:$t,body:$b}){discussion{url}}}`,
+                { r: q.repository.id, c: cat.id, t: meta.title, b: body });
+              core.info(`${f}: posted ${p.createDiscussion.discussion.url}`);
+            }

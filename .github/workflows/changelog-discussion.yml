@@ -1,0 +1,41 @@
+# Posts the newest CHANGELOG.md section to the "Changelog" discussion category whenever a push to
+# main changes CHANGELOG.md. One post per section heading: if a discussion with that title already
+# exists, it does nothing, so re-runs and unrelated edits are safe.
+name: Changelog to Discussions
+
+on:
+  push:
+    branches: [main]
+    paths: [CHANGELOG.md]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  discussions: write
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+            const text = fs.readFileSync("CHANGELOG.md", "utf8");
+            const parts = text.split(/^## /m).slice(1);
+            if (!parts.length) return core.info("No sections in CHANGELOG.md");
+            const [heading, ...rest] = parts[0].split("\n");
+            const title = `Changelog: ${heading.trim()}`;
+            const { owner, repo } = context.repo;
+            const body = rest.join("\n").trim() + `\n\nFull history: [CHANGELOG.md](https://github.com/${owner}/${repo}/blob/main/CHANGELOG.md)`;
+            const q = await github.graphql(`query($owner:String!,$repo:String!){repository(owner:$owner,name:$repo){id
+              discussionCategories(first:25){nodes{id name}}
+              discussions(first:50,orderBy:{field:CREATED_AT,direction:DESC}){nodes{title}}}}`, { owner, repo });
+            const r = q.repository;
+            const cat = r.discussionCategories.nodes.find(c => c.name === "Changelog");
+            if (!cat) return core.setFailed('No "Changelog" discussion category');
+            if (r.discussions.nodes.some(d => d.title === title)) return core.info(`Already posted: ${title}`);
+            const m = await github.graphql(`mutation($r:ID!,$c:ID!,$t:String!,$b:String!){createDiscussion(input:{repositoryId:$r,categoryId:$c,title:$t,body:$b}){discussion{url}}}`,
+              { r: r.id, c: cat.id, t: title, b: body });
+            core.info(`Posted ${m.createDiscussion.discussion.url}`);
