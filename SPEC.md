@@ -91,6 +91,19 @@ JSON over HTTPS under `/api`. The owner authenticates through the hosting provid
 agents use revocable bearer tokens with scopes (`read`, `items`, `leads`, `brain`, `admin`, and a
 callback-only scope for the deploy workflow).
 
+**One access-layer exemption, for the whole API.** The owner's pages sit behind the hosting provider's access
+layer (single sign-on for the owner only). `/api` is exempted from it as one path-scoped bypass, and the server
+authenticates **every** `/api` request itself, so nothing reaches the store on the strength of the bypass alone:
+- **The owner's app:** the server verifies the access layer's signed identity (its JWT, from the header or
+  cookie it sets) against the owner's address, so the owner's browser still calls `/api` signed in.
+- **Agents:** a revocable bearer token with scopes, stored only as a hash.
+- **The deploy workflow:** a callback-only token that can report a run on an item and nothing else.
+- **The code host's webhook:** its HMAC signature over the raw body, checked against a shared secret.
+
+Every caller that can't sign in, such as CI, webhooks or other machines, is then a new credential type, never a new
+bypass, and one address (the owner's domain plus `/api`) serves people and machines alike. Instances that keep
+the access layer on the API instead need one bypass per outside caller, or service tokens.
+
 **Agent channel: MCP (optional).** An instance may also serve an MCP server (`POST /mcp`, Streamable HTTP)
 as the agents' channel: thin tools over the same store as the REST API (read the brain, post and ack items,
 update tasks and cards, file the inbox), with the same `if_version` rules, and authenticated like any

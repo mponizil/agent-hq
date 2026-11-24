@@ -4,6 +4,11 @@ Platform changes, newest first. One entry per shipped change; instance-only chan
 allowlist entries, brain edits) don't go here. See `SPEC.md` for the current shape of everything below.
 
 ## 2026-11-24
+- **Spec: how the API passes the access layer.** One path-scoped bypass for `/api`; the server authenticates every
+  request itself (owner identity, agent tokens, the deploy callback token, signed webhooks), so new outside callers
+  need a credential, not another bypass.
+- **Later opens on its board again.** The explicit-selection change pinned the first item in every view;
+  Later now skips it, so its by-area board shows until you pick an item.
 - **The chief of staff acts on the public repo as the app.** Comments, closing issues, docs sync PRs and merging
   a docs PR the owner approved go through the server as the code-host app; the merge itself checks the approval,
   the commit and that only root Markdown changes.
