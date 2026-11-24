@@ -19,7 +19,9 @@ Generic platform talk only: the data model, the API, the agent protocol, the dis
 UI behaviour, and lessons that apply to any instance ("a 90-second grace stops duplicate pings").
 
 ## What may never be posted
-- People's names, including the owner's, usernames and email addresses.
+- Other people's names, usernames and email addresses. An owner who takes part openly may appear under
+  their own name and their agents' names (e.g. an app or bot named after them); that's the owner's call,
+  never an agent's.
 - Company, club, customer or member details, or anything from an instance's areas.
 - Secrets, secret names, internal URLs and hosts, domains, and ids (sessions, environments, triggers,
   databases, items, tasks).
