@@ -4,6 +4,12 @@ Platform changes, newest first. One entry per shipped change; instance-only chan
 allowlist entries, brain edits) don't go here. See `SPEC.md` for the current shape of everything below.
 
 ## 2026-11-24
+- **Replies are never lost.** Every reply the owner gives on an item is kept in `responses[]` and shown
+  above the decision, so a second decision no longer erases the first.
+- **Reopening counts as Updated.** A lead reopening a decided item with new text stamps `changedAt`, so the
+  owner sees what changed.
+- **Decided items keep the text that was decided:** after a decision, agents can't change an item's title,
+  summary, recommendation or options (409). Outcome, ack and links stay writable; reopening is the way to re-ask.
 - **Repo renames don't break deploys in flight:** `REPO_RENAMES` ("old=new") lets a run report back under
   the repo's new name for items posted before the rename.
 - **The public board is GitHub Issues**, labelled `changelog`, `idea` and `question`: one issue per thread,
