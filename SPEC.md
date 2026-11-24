@@ -53,9 +53,10 @@ Each edit carries a `note` saying what changed. Every agent reads it at the star
 | `title`, `summary`, `recommendation`, `options[]` | The ask. Summary and recommendation are sanitized Markdown |
 | `links[]`, `media[]` | Links, and screenshots stored privately (media can be superseded, never deleted) |
 | `choice`, `response`, `decidedAt`, `decidedBy` | The owner's decision; the server stamps `decidedAt` on every close |
+| `responses[]` | Every reply the owner gave, oldest first (`{at, by, text, choice, status}`), appended by the server, so a second decision never erases the first |
 | `ackedAt`, `outcome` | The lead acknowledged it, and what it did |
 | `laterLog[]`, `laterUntil` | Moves between Now and Later; an optional day it comes back by itself |
-| `changedAt`, `changeNote` | A lead changed an open item's content, and why (shown as **Updated**) |
+| `changedAt`, `changeNote` | A lead changed an open item's content, or reopened a decided one with new text, and why (shown as **Updated**) |
 | `deploy`, `approval`, `run`, `runs[]` | For deploy items: what to run, who approved it, and how the run went |
 
 **Now and Later.** Now is the open items: the badge, notifications and "inbox zero" count only these.
@@ -103,12 +104,23 @@ callback-only scope for the deploy workflow).
 | Admin | tokens, audit log, `GET /export`, `POST /import` (full round trip), push subscriptions |
 | Ops | `GET /ops/pickup_poll.py`: the dispatcher's poller, served so it never runs a stale copy |
 
+**Decided items are frozen** for agents: once an item leaves Now and Later, its `title`, `summary`,
+`recommendation` and `options` can't change (409). Everything else (outcome, ack, links, media, deploy
+run) stays writable; reopening the item is the way to re-ask.
+
+**Short refs** (`Q-<n>`, `T-<n>`) are one global sequence per collection rather than per-area prefixes: they
+never collide and survive an item or task moving to another area.
+
+**Items vs tasks:** an item is a moment where the owner decides; a task is a piece of work. In practice an
+item works like "a task with an optional decision step"; whether to merge the two is an open question.
+
 ## Scheduled jobs
 
 One minute cron, three jobs, each with its last run recorded and a **Run now** for the owner (same code
 path): deploy notifications (sent ~2 minutes after a deploy item is posted, unless already decided),
 auto-unblock (date and task waits, and dated Later tasks), and Later returns (dated Later items back to
-Now, with a notification).
+Now, with a notification). Recording every run costs about 1,440 small writes a day, accepted for the
+visibility.
 
 ## The dispatcher
 
@@ -146,7 +158,19 @@ exactly one variant; a note typed at approval can't change what ships.
 owner's exact words. **Small-change lane:** small UI or docs changes the owner explicitly asked for may
 be dispatched by the chief of staff without a separate approval, through `POST /items/<id>/lane-dispatch`:
 the server reads the branch's diff and dispatches only if every file is UI or docs (never the agents'
-rule file) and no migrations ship; otherwise the item stays open for the owner. **Hand merges:** changes to workflow
+rule file) and no migrations ship; otherwise the item stays open for the owner. Why it's shaped this way:
+- **The file check is the enforcement.** Who may call the lane is a self-declared header; what ships is
+  decided by the diff, which the agent can't influence.
+- **It fails closed:** a 403 or 404 from the code host, an empty file list, or a diff too large to list in
+  full (100+ files) all refuse with 422.
+- **Build config is deliberately outside** the allowlist (bundler, package and TypeScript config can change
+  what ships), and a renamed file counts under both its old and new path.
+- **Rejected:** a `lane` input on the deploy workflow (a workflow change needs a hand merge, and the input
+  would be bypassable), and a per-option "this option deploys" flag on items (a deploy item ships exactly one
+  variant instead).
+
+**Repo renames:** `REPO_RENAMES` ("old=new") lets runs of items posted before a rename report under the new
+name. It maps one way only, and should be emptied once the old name belongs to another repository. **Hand merges:** changes to workflow
 files go to the owner as a pull request.
 
 ## Stack
