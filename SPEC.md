@@ -95,7 +95,7 @@ callback-only scope for the deploy workflow).
 | Brain | `GET /brain`, `PUT /brain {text, if_version, note}`, `GET /brain/history` |
 | Documents | `GET/PUT/PATCH /items/<id>`, `/tasks/<id>`, `/leads/<id>`, `/areas/<id>`, `/views/<id>`; list with filters; `GET /items/Q-142`, `/tasks/T-88` by short ref |
 | Media | `PUT /items/<id>/media?caption=…[&replace=1]`, `PATCH /items/<id>/media {supersede: [url]}`, `GET /media/<key>` |
-| Deploys | `POST /items/<id>/deploy` (owner), `POST /items/<id>/deploy-chat-approval` (chief of staff, with the owner's exact words), `POST /items/<id>/deploy-result` (workflow callback) |
+| Deploys | `POST /items/<id>/deploy` (owner), `POST /items/<id>/deploy-chat-approval` (chief of staff, with the owner's exact words), `POST /items/<id>/lane-dispatch` (chief of staff, small-change lane), `POST /items/<id>/deploy-result` (workflow callback) |
 | Tasks | `GET /tasks/<id>/events`, `GET /task-events`, `GET/POST /tasks/<id>/comments`, `GET /comments` |
 | Areas, inbox | `GET/POST /areas/<id>/log`, `GET/POST /inbox`, `POST /inbox/<id>/file|dismiss` |
 | Queue | `GET/PUT /queue/busy {minutes, note}` (a self-expiring "hold approvals a moment" banner) |
@@ -144,7 +144,9 @@ exactly one variant; a note typed at approval can't change what ships.
 
 **Approval paths:** in the app (owner only), or in chat with the chief of staff, which records the
 owner's exact words. **Small-change lane:** small UI or docs changes the owner explicitly asked for may
-be dispatched by the chief of staff without a separate approval. **Hand merges:** changes to workflow
+be dispatched by the chief of staff without a separate approval, through `POST /items/<id>/lane-dispatch`:
+the server reads the branch's diff and dispatches only if every file is UI or docs (never the agents'
+rule file) and no migrations ship; otherwise the item stays open for the owner. **Hand merges:** changes to workflow
 files go to the owner as a pull request.
 
 ## Stack

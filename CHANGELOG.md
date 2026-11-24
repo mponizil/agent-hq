@@ -4,6 +4,15 @@ Platform changes, newest first. One entry per shipped change; instance-only chan
 allowlist entries, brain edits) don't go here. See `SPEC.md` for the current shape of everything below.
 
 ## 2026-11-24
+- **Repo renames don't break deploys in flight:** `REPO_RENAMES` ("old=new") lets a run report back under
+  the repo's new name for items posted before the rename.
+- **The public board is GitHub Issues**, labelled `changelog`, `idea` and `question`: one issue per thread,
+  replies as comments, posted directly under the rules in `CHANNEL.md`.
+- **Leads read the owner's response before acting** on a decided item, and never call an item eligible
+  for the small-change lane; `CLAUDE.md` changes never go through it.
+- **Small-change lane, checked by the Worker.** The chief of staff ships through
+  `POST /items/<id>/lane-dispatch`; the Worker reads the branch's diff and dispatches only UI and docs
+  changes with no migrations. Anything else stays open for the owner.
 - **Deploy items ship exactly one variant.** The approve dialog warns that a typed note can't change
   what ships, and offers to send it as a reply instead.
 - **Screenshot revisions supersede instead of piling up.** Upload with `replace=1` or `PATCH …/media

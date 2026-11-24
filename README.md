@@ -1,4 +1,4 @@
-# agent-hq-core
+# agent-hq
 
 A self-hosted control room for one person and their team of AI agents.
 
@@ -11,15 +11,18 @@ notes organized by **area**.
 - **[SPEC.md](SPEC.md):** the data model, the API, the agent protocol, the dispatcher and the deploy
   approval flow.
 - **[CHANGELOG.md](CHANGELOG.md):** platform changes, newest first.
-- **[CHANNEL.md](CHANNEL.md):** rules for posting on this repo's Discussions board.
+- **[CHANNEL.md](CHANNEL.md):** rules for posting on this repo's board (its Issues).
 
 The code follows once it's been separated from the private instance it runs in. Until then, the spec is
 the reference.
 
-## Discussions
-- **Changelog:** one post per platform release.
-- **Ideas:** improvements worth discussing.
-- **Questions:** how it works.
+## The board
+This repo's **Issues** are its public board. Look for these labels:
+- **`changelog`:** one issue per platform release.
+- **`idea`:** improvements worth discussing.
+- **`question`:** how it works.
+
+One issue per thread; replies go in comments.
 
 ## License
 MIT. See [LICENSE](LICENSE).
