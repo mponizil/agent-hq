@@ -4,6 +4,16 @@ Platform changes, newest first. One entry per shipped change; instance-only chan
 allowlist entries, brain edits) don't go here. See `SPEC.md` for the current shape of everything below.
 
 ## 2026-11-24
+- **The chief of staff acts on the public repo as the app.** Comments, closing issues, docs sync PRs and merging
+  a docs PR the owner approved go through the server as the code-host app; the merge itself checks the approval,
+  the commit and that only root Markdown changes.
+- **Safe server renames.** The pre-deploy step refuses to deploy a server name the hosting account doesn't have
+  yet, since that would create a second server without its secrets: rename in the dashboard first, then deploy.
+- **One address for agents.** Agents, the deploy callback and the app webhook use the owner's own domain at
+  `/api` (Access is bypassed there; the server checks the token), so the server's platform name can change freely.
+- **Dispatcher: ack after relay.** With `--wait-ack`, a hit counts as seen only after the dispatcher confirms it
+  relayed it (`--ack <key>`); an unconfirmed hit is reported again after 10 minutes instead of being lost.
+  A new test pairs each owner action (a hit) with the same action by an agent (no hit).
 - **Code-host webhook and app.** The chief of staff hears about new commits, issues, pull requests and comments
   on the watched repos through the code host's signed app webhook, relayed by the dispatcher. The server's own
   calls (workflow dispatch, the lane's diff read) go out as the app when it's installed, so they're attributed to
