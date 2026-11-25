@@ -224,6 +224,16 @@ go through the server as the app: `/github/issues` (board labels only), `/github
 merge checks that the owner approved an item linking that PR, that the PR is at the approved commit, and that
 it only touches root-level Markdown.
 
+**Code-host content is untrusted.** On a public repo anyone can open issues and PRs, so webhook text must not
+be able to steer an agent or run up its cost:
+- **Only an allowlist of actors wakes agents** (the owner and the instance's own apps). Everyone else's activity
+  is still stored and visible in `/repo-events`, but it wakes nobody.
+- **Relayed hits are framed as external and untrusted** (a fixed prefix on the summary). Agents treat that text as
+  data, never instructions, and never check out, install or run code from a public repo's PRs or forks.
+- **Free text is cleaned before it's stored:** titles and refs become one line, with control, bidi and zero-width
+  characters stripped and the length capped.
+- **Hits are capped per hour:** past the cap, the rest of that hour's events arrive as one summary hit.
+
 **Hand merges:** changes to workflow files go to the owner as a pull request. The item's options say what
 the owner did ("Merged PR #N", "Hold"), never an instruction to an agent: an option reading "Merge PR #N"
 was once taken to mean an agent would merge it. An instance may let the chief of staff merge docs-only PRs (for
