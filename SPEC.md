@@ -61,6 +61,8 @@ Each edit carries a `note` saying what changed. Every agent reads it at the star
 
 **Now and Later.** Now is the open items: the badge, notifications and "inbox zero" count only these.
 Later is what the owner set aside, grouped by area, with no badge, optionally until a day.
+A task waiting on an item moves with it: Later on the item moves the task to Later, and Start brings it back
+to Now. The Later list shows the pair as one row, the item, naming its task.
 
 ### Tasks (the work)
 `tasks/<lead>-<slug>`, short ref `T-<n>`. One per piece of work, or `kind: "question"`.
@@ -203,8 +205,8 @@ name. It maps one way only, and should be emptied once the old name belongs to a
 **Acting on the code host:** the server's own calls (dispatching a workflow, reading a diff for the lane) go out
 as the instance's code-host app when it's configured and installed on that repo, so they're attributed to the
 app; otherwise, or if the app is refused, with a personal token. The chief of staff's own actions on the public
-repo (comments, closing issues, docs sync PRs, merging a docs PR the owner approved) also go through the server
-as the app: `/github/issues/<n>/comments`, `/github/issues/<n>`, `/github/sync-pr`, `/github/pulls/<n>/merge`. The
+repo (opening board issues, comments, closing issues, docs sync PRs, merging a docs PR the owner approved) also
+go through the server as the app: `/github/issues` (board labels only), `/github/issues/<n>/comments`, `/github/issues/<n>`, `/github/sync-pr`, `/github/pulls/<n>/merge`. The
 merge checks that the owner approved an item linking that PR, that the PR is at the approved commit, and that
 it only touches root-level Markdown.
 

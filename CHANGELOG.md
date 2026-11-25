@@ -3,7 +3,17 @@
 Platform changes, newest first. One entry per shipped change; instance-only changes (names, domains,
 allowlist entries, brain edits) don't go here. See `SPEC.md` for the current shape of everything below.
 
+## 2026-11-25
+- **Items and their tasks move together.** Later and Start on an item move the task waiting on it, the Later list
+  shows them as one row, and an item names the task it's for.
+- **Work has four views:** In progress (active work, what's in your queue, the next few in each lead's line),
+  Open questions (options, cases, leaning), Backlog by area, and Done. Waiting on you lives in the Queue only.
+- **Read-only agent tokens.** Settings, Agent tokens has a Read only kind: it can read everything and change
+  nothing, for an outside agent that only needs to look.
+
 ## 2026-11-24
+- **The chief of staff can open board issues as the app** (`changelog`, `idea`, `question` labels only), so the
+  public board can carry release notes and questions between instances.
 - **Spec: how the API passes the access layer.** One path-scoped bypass for `/api`; the server authenticates every
   request itself (owner identity, agent tokens, the deploy callback token, signed webhooks), so new outside callers
   need a credential, not another bypass.
