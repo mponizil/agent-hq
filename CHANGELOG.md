@@ -4,6 +4,10 @@ Platform changes, newest first. One entry per shipped change; instance-only chan
 allowlist entries, brain edits) don't go here. See `SPEC.md` for the current shape of everything below.
 
 ## 2026-11-25
+- **Deciding is select, then submit.** Picking an option only selects it; one button that names the action
+  decides ("Approve: <option>", "Send answer", "Send reply"). The server refuses an approval without a choice
+  and a reply that carries one (questions excepted), and a later reject, reply or close keeps the earlier
+  choice. `done` closes without deciding. The deploy confirm shows the branch, commit and migrations.
 - **Work's view tabs no longer scroll up and down on phones.** The strip only scrolls sideways, with no scrollbar.
 - **Your decision moves the task.** Deciding an ask hands its task back to the lead ("Your call is in"); a clean
   deploy acks itself and closes its tasks. Agents now ask through the task (`POST /tasks/<id>/asks`), and an item

@@ -67,6 +67,21 @@ to Now. The owner's decision hands the task back to its lead (`ready`, "your cal
 ships with no note on the approval acks the item and marks its tasks `done`; a note or a failed run makes them
 `ready`. The Later list shows the pair as one row, the item, naming its task.
 
+**Deciding.** Picking an option only selects it; the owner decides with an explicit submit whose label names
+the action ("Approve: <option>", "Send answer" for a question, "Send reply" for text alone), next to Reject
+and Later. The server holds the line on what a decision means:
+- **Approving never assumes a choice.** An approval on an item with options must name one (otherwise 400).
+- **A reply never carries a choice.** `answered` with a choice is only for questions; a reply on any other
+  item is text only (otherwise 400), so a reply can't be mistaken for an approval.
+- **A later close keeps the decision.** Rejecting, replying or closing (`done`) an item that already has a
+  `choice` never clears it; the new note goes into `responses[]`. Repeating the same decision with nothing new
+  changes nothing.
+- **`done` closes without deciding.** It's for items that need no decision (an acknowledged brief: "Got it"),
+  not a way to decide.
+
+A decided item shows a short summary of the owner's call (choice, note, who, when, earlier replies) with a
+quiet way to change it, never a full decide panel.
+
 ### Tasks (the work)
 `tasks/<lead>-<slug>`, short ref `T-<n>`. One per piece of work, or `kind: "question"`.
 
@@ -185,7 +200,9 @@ A deploy item names `{repo, workflow, ref, inputs: {branch, sha, …}}`. Only al
 `repo:workflow@ref` pairs can run. On approval, the server dispatches the workflow. The workflow merges
 exactly the approved commit from the latest main (it refuses if the branch moved), runs the
 pending migrations it was told to expect, ships, and reports the run back to the item. A deploy item ships
-exactly one variant; a note typed at approval can't change what ships.
+exactly one variant; a note typed at approval can't change what ships. Approving asks for one confirm that
+shows exactly what ships: the branch, the full commit and the migrations it expects. With a note typed, the
+confirm says the note won't change what ships and offers to send it as a reply instead.
 
 **Approval paths:** in the app (owner only), or in chat with the chief of staff, which records the
 owner's exact words. **Small-change lane:** small UI or docs changes the owner explicitly asked for may
