@@ -4,6 +4,16 @@ Platform changes, newest first. One entry per shipped change; instance-only chan
 allowlist entries, brain edits) don't go here. See `SPEC.md` for the current shape of everything below.
 
 ## 2026-11-25
+- **Work's view tabs no longer scroll up and down on phones.** The strip only scrolls sideways, with no scrollbar.
+- **Your decision moves the task.** Deciding an ask hands its task back to the lead ("Your call is in"); a clean
+  deploy acks itself and closes its tasks. Agents now ask through the task (`POST /tasks/<id>/asks`), and an item
+  without a task is refused.
+- **Decide on the task's page.** A task shows its open ask with Approve, Reject, Reply and Later, and its past asks
+  below. A `/q/<n>` link to an open ask opens its task.
+- **Existing items know their task, and briefs have their own home.** A one-time migration sets `taskId` (and
+  `covers[]` for shared deploys) on every item a task points at. Daily briefs move to `briefs/<id>`, which Home reads.
+- **Asks: a task's request to the owner.** `POST /tasks/<id>/asks` creates the queue item and points the task at it
+  in one call (one open ask per task). A task shows its asks, and items can name `taskId` and `covers[]`.
 - **Items and their tasks move together.** Later and Start on an item move the task waiting on it, the Later list
   shows them as one row, and an item names the task it's for.
 - **Work has four views:** In progress (active work, what's in your queue, the next few in each lead's line),

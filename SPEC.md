@@ -58,11 +58,14 @@ Each edit carries a `note` saying what changed. Every agent reads it at the star
 | `laterLog[]`, `laterUntil` | Moves between Now and Later; an optional day it comes back by itself |
 | `changedAt`, `changeNote` | A lead changed an open item's content, or reopened a decided one with new text, and why (shown as **Updated**) |
 | `deploy`, `approval`, `run`, `runs[]` | For deploy items: what to run, who approved it, and how the run went |
+| `taskId`, `covers[]` | The task this ask is for, and other tasks a shared deploy also ships (both checked to exist). Agents can't create an item without `taskId` |
 
 **Now and Later.** Now is the open items: the badge, notifications and "inbox zero" count only these.
 Later is what the owner set aside, grouped by area, with no badge, optionally until a day.
 A task waiting on an item moves with it: Later on the item moves the task to Later, and Start brings it back
-to Now. The Later list shows the pair as one row, the item, naming its task.
+to Now. The owner's decision hands the task back to its lead (`ready`, "your call is in"). A deploy run that
+ships with no note on the approval acks the item and marks its tasks `done`; a note or a failed run makes them
+`ready`. The Later list shows the pair as one row, the item, naming its task.
 
 ### Tasks (the work)
 `tasks/<lead>-<slug>`, short ref `T-<n>`. One per piece of work, or `kind: "question"`.
@@ -117,10 +120,10 @@ itself or another agent with its own changes.
 | Area | Endpoints |
 |---|---|
 | Brain | `GET /brain`, `PUT /brain {text, if_version, note}`, `GET /brain/history` |
-| Documents | `GET/PUT/PATCH /items/<id>`, `/tasks/<id>`, `/leads/<id>`, `/areas/<id>`, `/views/<id>`; list with filters; `GET /items/Q-142`, `/tasks/T-88` by short ref |
+| Documents | `GET/PUT/PATCH /items/<id>`, `/tasks/<id>`, `/leads/<id>`, `/areas/<id>`, `/views/<id>`, `/briefs/<id>` (the daily brief, not a queue item); list with filters; `GET /items/Q-142`, `/tasks/T-88` by short ref |
 | Media | `PUT /items/<id>/media?caption=…[&replace=1]`, `PATCH /items/<id>/media {supersede: [url]}`, `GET /media/<key>` |
 | Deploys | `POST /items/<id>/deploy` (owner), `POST /items/<id>/deploy-chat-approval` (chief of staff, with the owner's exact words), `POST /items/<id>/lane-dispatch` (chief of staff, small-change lane), `POST /items/<id>/deploy-result` (workflow callback) |
-| Tasks | `GET /tasks/<id>/events`, `GET /task-events`, `GET/POST /tasks/<id>/comments`, `GET /comments` |
+| Tasks | `GET/POST /tasks/<id>/asks` (an ask is an item for that task: POST creates it open with the task's lead and area and sets the task `waiting-owner` on it in the same call, one open ask per task; `GET /tasks/<id>` includes `asks`, and the task list carries each task's open `ask`), `GET /tasks/<id>/events`, `GET /task-events`, `GET/POST /tasks/<id>/comments`, `GET /comments` |
 | Areas, inbox | `GET/POST /areas/<id>/log`, `GET/POST /inbox`, `POST /inbox/<id>/file|dismiss` |
 | Queue | `GET/PUT /queue/busy {minutes, note}` (a self-expiring "hold approvals a moment" banner) |
 | Jobs | `GET /jobs`, `POST /jobs/<id>/run` (owner): the scheduled jobs and a manual run |
