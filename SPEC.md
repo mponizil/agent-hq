@@ -67,6 +67,17 @@ to Now. The owner's decision hands the task back to its lead (`ready`, "your cal
 ships with no note on the approval acks the item and marks its tasks `done`; a note or a failed run makes them
 `ready`. The Later list shows the pair as one row, the item, naming its task.
 
+**Deciding.** Picking an option only selects it; the owner decides with an explicit submit, kept short
+("Approve: 1"), next to Reject, Reply and Later.
+- **Approving requires an explicit choice.** On an item with options, an approval without one is refused
+  (400); the server never falls back to the first option.
+- **A reply can carry a choice.** A reply with an option selected decides with that option; text alone is a
+  plain reply.
+- **Every decision is kept** in `responses[]`.
+
+A decided item shows a one-line summary of the owner's call and a quiet **Reopen** that puts it back in Now
+(none on an approved deploy).
+
 ### Tasks (the work)
 `tasks/<lead>-<slug>`, short ref `T-<n>`. One per piece of work, or `kind: "question"`.
 
